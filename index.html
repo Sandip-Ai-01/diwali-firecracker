@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Diwali Vibes – Share the Light, Spread the Happiness!</title>
+<!--
+  DIWALI VIBES — single-file app (HTML + CSS + JS, zero dependencies)
+  RUN:     double-click this file, or serve it:  npx serve .   /  python -m http.server
+  DEPLOY:  drag & drop onto Netlify Drop, or push to GitHub and enable Pages, or upload to Vercel/Cloudflare Pages.
+  NO LOGIN: a local guest profile is created automatically. Admin dashboard is open from the nav (demo only).
+  DATA:    stored in this browser's localStorage (accounts, posts, images compressed to ~900px JPEG).
+           To go multi-user online, replace the DB layer (load()/save()) with fetch() calls to a Flask/Node + MongoDB + Cloudinary API.
+-->
+<style>
+:root{--bg:#120826;--bg2:#2a0f4a;--card:rgba(255,255,255,.07);--bd:rgba(255,200,100,.25);--tx:#fdf3e3;--mut:#c9b7e6;--gold:#ffd166;--sf:#ff8c1a;--rd:#ff4d6d;--glow:0 0 24px rgba(255,170,40,.35)}
+[data-theme=light]{--bg:#fff6e5;--bg2:#ffe3b8;--card:rgba(255,255,255,.75);--bd:rgba(200,110,20,.3);--tx:#3b1a05;--mut:#8a5a2b;--glow:0 6px 20px rgba(200,110,20,.25)}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Poppins','Segoe UI',system-ui,sans-serif;background:radial-gradient(1200px 700px at 50% -10%,var(--bg2),var(--bg));background-attachment:fixed;color:var(--tx);min-height:100vh;padding-bottom:70px}
+h1,h2,h3,.logo{font-family:'Georgia','Playfair Display',serif}
+a{color:inherit;cursor:pointer;text-decoration:none}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+.wrap{max-width:1150px;margin:0 auto;padding:0 16px}
+.gold{background:linear-gradient(90deg,#ffd166,#ff8c1a,#ffd166);-webkit-background-clip:text;background-clip:text;color:transparent}
+/* nav */
+header{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);background:color-mix(in srgb,var(--bg) 70%,transparent);border-bottom:1px solid var(--bd)}
+.nav{display:flex;align-items:center;gap:12px;height:62px}
+.logo{font-size:1.3rem;font-weight:700;white-space:nowrap}
+.links{display:flex;gap:4px;margin-left:auto}
+.links a{padding:8px 14px;border-radius:99px;font-size:.9rem;color:var(--mut);transition:.25s}
+.links a:hover,.links a.on{background:var(--card);color:var(--gold);box-shadow:var(--glow)}
+.ic{background:var(--card);border:1px solid var(--bd);border-radius:50%;width:38px;height:38px;display:grid;place-items:center;position:relative;transition:.2s}
+.ic:hover{transform:scale(1.1);box-shadow:var(--glow)}
+.badge{position:absolute;top:-4px;right:-4px;background:var(--rd);color:#fff;font-size:.65rem;border-radius:99px;padding:1px 5px}
+@media(max-width:820px){.links{position:fixed;bottom:0;left:0;right:0;margin:0;justify-content:space-around;background:var(--bg);border-top:1px solid var(--bd);padding:6px;z-index:60}.links a{padding:8px 10px;font-size:.78rem;text-align:center}.nav .sp{margin-left:auto}}
+/* buttons / cards */
+.btn{display:inline-flex;gap:8px;align-items:center;justify-content:center;border:0;border-radius:99px;padding:11px 22px;font-weight:600;background:linear-gradient(135deg,var(--gold),var(--sf));color:#3b1a05;box-shadow:var(--glow);transition:.25s;position:relative;overflow:hidden}
+.btn:hover{transform:translateY(-2px) scale(1.03)}
+.btn.ghost{background:var(--card);color:var(--tx);border:1px solid var(--bd);box-shadow:none}
+.btn.sm{padding:6px 14px;font-size:.85rem}
+.btn.danger{background:linear-gradient(135deg,#ff4d6d,#c9184a);color:#fff}
+.pulse{animation:pulse 2s infinite}@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,170,40,.6)}50%{box-shadow:0 0 0 16px rgba(255,170,40,0)}}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:20px;backdrop-filter:blur(12px);padding:18px;position:relative}
+.glow{position:relative}
+.glow::before{content:"";position:absolute;inset:-1px;border-radius:21px;padding:1px;background:conic-gradient(from var(--a,0deg),transparent,var(--gold),transparent 40%,var(--sf),transparent);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:spin 5s linear infinite;pointer-events:none}
+@property --a{syntax:'<angle>';inherits:false;initial-value:0deg}@keyframes spin{to{--a:360deg}}
+input,select,textarea{width:100%;background:rgba(255,255,255,.08);border:1px solid var(--bd);border-radius:12px;padding:10px 14px;outline:0}
+[data-theme=light] input,[data-theme=light] select,[data-theme=light] textarea{background:#fff}
+input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:var(--glow)}
+select option{color:#222}
+label{font-size:.82rem;color:var(--mut);display:block;margin:10px 0 4px}
+.chip{display:inline-block;background:rgba(255,200,100,.15);border:1px solid var(--bd);padding:4px 12px;border-radius:99px;font-size:.78rem;cursor:pointer;transition:.2s;white-space:nowrap}
+.chip.on,.chip:hover{background:linear-gradient(135deg,var(--gold),var(--sf));color:#3b1a05}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.grid{display:grid;gap:18px}
+.g3{grid-template-columns:repeat(auto-fill,minmax(290px,1fr))}
+.g2{grid-template-columns:repeat(auto-fill,minmax(340px,1fr))}
+h2.sec{font-size:1.9rem;margin:34px 0 14px}
+.mut{color:var(--mut)}
+/* hero */
+.hero{position:relative;min-height:calc(100vh - 62px);display:grid;place-items:center;text-align:center;overflow:hidden;padding:30px 0 120px}
+.hero canvas.fw{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.hero .in{position:relative;z-index:3;max-width:820px;padding:0 16px}
+.hero h1{font-size:clamp(2.2rem,6vw,4.4rem);line-height:1.1;margin-bottom:14px;text-shadow:0 0 30px rgba(255,170,40,.5)}
+.hero p.sub{font-size:clamp(1rem,2.2vw,1.3rem);color:var(--mut);margin-bottom:26px}
+.lights{position:absolute;top:0;left:0;right:0;height:90px;z-index:2;pointer-events:none}
+.lights i{position:absolute;width:12px;height:16px;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;animation:tw 1.6s infinite alternate}
+@keyframes tw{from{opacity:.35;transform:scale(.9)}to{opacity:1;transform:scale(1.15);filter:drop-shadow(0 0 8px currentColor)}}
+.parts i{position:absolute;bottom:-10px;width:5px;height:5px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px var(--gold);animation:rise linear infinite}
+@keyframes rise{to{transform:translateY(-110vh) translateX(40px);opacity:0}}
+.rang{position:absolute;opacity:.35;animation:rot 60s linear infinite;pointer-events:none}
+@keyframes rot{to{transform:rotate(360deg)}}
+.diya{width:64px;height:30px;background:linear-gradient(#e08a3a,#8a3b0f);border-radius:0 0 64px 64px/0 0 30px 30px;position:relative;box-shadow:0 8px 20px rgba(0,0,0,.4)}
+.diya::before{content:"";position:absolute;left:-8px;top:-4px;width:20px;height:10px;background:#c96a22;border-radius:50% 0 50% 50%}
+.flame{position:absolute;left:50%;bottom:calc(100% - 4px);width:14px;height:28px;margin-left:-7px;background:radial-gradient(ellipse at 50% 75%,#fff 0,#ffe27a 30%,#ff8c1a 65%,transparent 72%);border-radius:50% 50% 50% 50%/65% 65% 35% 35%;animation:fl .18s infinite alternate;transform-origin:50% 100%;filter:drop-shadow(0 0 14px #ff9d2e)}
+.flame::after{content:"";position:absolute;left:-30px;top:-20px;width:74px;height:74px;border-radius:50%;background:radial-gradient(circle,rgba(255,170,40,.45),transparent 70%)}
+@keyframes fl{from{transform:scale(1,1) rotate(-3deg)}to{transform:scale(.88,1.12) rotate(3deg)}}
+.candle{width:22px;height:74px;background:linear-gradient(90deg,#f1dcb4,#fff,#f1dcb4);border-radius:4px 4px 2px 2px;position:relative;box-shadow:0 0 30px rgba(255,170,40,.3)}
+.candle .flame{bottom:calc(100% + 2px)}
+.fl{position:absolute;animation:fy 5s ease-in-out infinite alternate;z-index:2}
+@keyframes fy{to{transform:translateY(-18px)}}
+.cd{display:flex;gap:12px;justify-content:center;margin:24px 0}
+.cd div{min-width:74px;padding:10px;border-radius:16px;background:var(--card);border:1px solid var(--bd);box-shadow:var(--glow)}
+.cd b{display:block;font-size:1.7rem;color:var(--gold)}.cd span{font-size:.7rem;color:var(--mut)}
+/* posts */
+.post{padding:0;overflow:hidden;transition:.3s}.post:hover{transform:translateY(-4px);box-shadow:var(--glow)}
+.post .ph{display:flex;justify-content:space-between;align-items:center;padding:12px 14px}
+.post .ph a{display:flex;gap:8px;align-items:center}
+.post>img{width:100%;aspect-ratio:1;object-fit:cover;display:block;cursor:zoom-in}
+.acts{display:flex;gap:6px;padding:10px 12px;flex-wrap:wrap}
+.acts button{background:none;border:0;font-size:.95rem;padding:4px 8px;border-radius:10px;transition:.2s}
+.acts button:hover{background:rgba(255,200,100,.15)}.acts button.on{color:var(--rd)}.acts .sv.on{color:var(--gold)}
+.cap{padding:0 14px 10px;font-size:.9rem}.cap .tag{color:var(--gold);cursor:pointer}
+.cm{padding:0 14px 12px;font-size:.84rem}.cm p{margin:3px 0}.cm form{display:flex;gap:6px;margin-top:6px}
+.av{border-radius:50%;display:inline-grid;place-items:center;background:linear-gradient(135deg,var(--sf),#c9184a);color:#fff;font-weight:700;object-fit:cover;flex:none;overflow:hidden}
+.skel{height:380px;border-radius:20px;background:linear-gradient(90deg,var(--card),rgba(255,200,100,.18),var(--card));background-size:200% 100%;animation:sk 1.2s infinite}@keyframes sk{to{background-position:-200% 0}}
+.empty{text-align:center;padding:50px 20px;color:var(--mut)}.empty big{font-size:3rem;display:block}
+/* modal / toast */
+.modal{position:fixed;inset:0;z-index:100;background:rgba(10,3,25,.8);backdrop-filter:blur(6px);display:grid;place-items:center;padding:16px;animation:fi .25s}
+@keyframes fi{from{opacity:0}}
+.modal .box{background:var(--bg);border:1px solid var(--bd);border-radius:22px;padding:22px;width:min(480px,100%);max-height:92vh;overflow:auto;box-shadow:var(--glow)}
+.modal.big .box{width:min(960px,100%)}
+.x{float:right;background:none;border:0;font-size:1.4rem}
+#toasts{position:fixed;top:74px;right:14px;z-index:200;display:grid;gap:8px}
+.toast{background:var(--bg);border:1px solid var(--gold);border-radius:14px;padding:10px 16px;box-shadow:var(--glow);animation:ti .3s}
+@keyframes ti{from{transform:translateX(40px);opacity:0}}
+.pop{position:absolute;right:0;top:46px;width:310px;max-height:60vh;overflow:auto;z-index:70;background:var(--bg);border:1px solid var(--bd);border-radius:16px;padding:10px;box-shadow:var(--glow)}
+.pop div{padding:8px;border-bottom:1px solid var(--bd);font-size:.85rem}
+/* experiences */
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}
+.stage{position:relative;height:440px;border-radius:20px;overflow:hidden;border:1px solid var(--bd);background:linear-gradient(#0a0320,#2a0f4a 70%,#5b2a1a);cursor:crosshair;touch-action:none}
+.stage canvas{width:100%;height:100%;display:block}
+.stage .hint{position:absolute;top:10px;left:0;right:0;text-align:center;color:var(--mut);pointer-events:none;font-size:.9rem}
+.sd{position:absolute;transform:translate(-50%,-100%) scale(.6);animation:pop .4s}@keyframes pop{from{transform:translate(-50%,-100%) scale(0)}}
+.lan{position:absolute;bottom:-90px;width:54px;height:70px;border-radius:14px 14px 20px 20px;background:linear-gradient(#ffcf70,#ff7a18);box-shadow:0 0 30px 8px rgba(255,150,40,.6);animation:lanf linear forwards;display:grid;place-items:center;font-size:1.3rem}
+.lan span{position:absolute;top:78px;width:150px;left:50%;margin-left:-75px;text-align:center;font-size:.72rem;color:#ffe9b8;text-shadow:0 0 6px #000}
+@keyframes lanf{to{transform:translate(var(--dx),-560px);opacity:.1}}
+.swatch{width:30px;height:30px;border-radius:50%;border:2px solid transparent;cursor:pointer}.swatch.on{border-color:#fff;transform:scale(1.2)}
+.quiz button.opt{display:block;width:100%;text-align:left;margin:6px 0;background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:10px 14px}
+.quiz button.ok{background:#1f8f4a;color:#fff}.quiz button.no{background:#b3283f;color:#fff}
+.stat{text-align:center}.stat b{display:block;font-size:2rem;color:var(--gold)}
+table{width:100%;border-collapse:collapse;font-size:.88rem}td,th{padding:8px;border-bottom:1px solid var(--bd);text-align:left}
+.bar{height:10px;border-radius:99px;background:rgba(255,255,255,.12);overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--sf))}
+.badges span{display:inline-block;margin:3px;padding:5px 12px;border-radius:99px;background:linear-gradient(135deg,rgba(255,209,102,.25),rgba(255,140,26,.25));border:1px solid var(--bd);font-size:.8rem}
+.gal{position:relative;text-align:center}.gal img{max-width:100%;max-height:72vh;border-radius:14px}
+.gal .nv{position:absolute;top:40%;font-size:2rem;background:rgba(0,0,0,.5);border:0;color:#fff;border-radius:50%;width:44px;height:44px}
+/* attractive upgrades */
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(650px 420px at 12% 18%,rgba(255,120,30,.2),transparent),radial-gradient(750px 520px at 88% 72%,rgba(160,60,255,.25),transparent),radial-gradient(500px 360px at 60% 5%,rgba(255,209,102,.12),transparent);animation:aur 16s ease-in-out infinite alternate}
+@keyframes aur{to{transform:scale(1.15) translate(30px,-20px);filter:hue-rotate(25deg)}}
+#sky{position:fixed;inset:0;z-index:-1;pointer-events:none}#sky i{position:absolute;border-radius:50%;background:#ffe9b8;animation:tws infinite alternate}@keyframes tws{from{opacity:.08}to{opacity:.9}}[data-theme=light] #sky{display:none}
+.gold{background-size:200% auto;animation:sh 5s linear infinite}@keyframes sh{to{background-position:200% center}}
+.btn::after{content:"";position:absolute;top:0;left:-70%;width:40%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);transform:skewX(-20deg);animation:shine 3.5s infinite}@keyframes shine{to{left:130%}}
+.mas{column-width:290px;column-gap:18px}.mas>*{break-inside:avoid;margin-bottom:18px;display:block}
+.post{animation:rs .6s backwards;border-radius:22px;overflow:hidden}@keyframes rs{from{opacity:0;transform:translateY(26px) scale(.97)}}
+.post>img{transition:transform .7s}.post:hover>img{transform:scale(1.06)}.post:hover{border-color:var(--gold);box-shadow:0 12px 40px rgba(255,140,26,.28)}
+.stories{display:flex;gap:16px;overflow-x:auto;padding:6px 2px 16px;scrollbar-width:none}.stories::-webkit-scrollbar{display:none}
+.stories a{display:grid;justify-items:center;gap:4px;flex:none;font-size:.72rem;color:var(--mut)}
+.ring{padding:3px;border-radius:50%;background:conic-gradient(var(--gold),var(--sf),#c9184a,#7b2ff7,var(--gold));display:block;transition:.3s}.ring .av{border:3px solid var(--bg);display:grid}
+.stories a:hover .ring{transform:scale(1.1) rotate(20deg)}
+#fab{position:fixed;right:18px;bottom:84px;z-index:55;width:58px;height:58px;border-radius:50%;padding:0;font-size:1.5rem}
+@media(min-width:821px){#fab{bottom:26px}}
+header{box-shadow:0 4px 30px rgba(255,140,26,.12)}
+.mohni{display:inline-block;margin:0 auto 22px;padding:14px 28px;border-radius:22px;font-size:clamp(1.2rem,3.4vw,1.9rem);font-family:Georgia,serif;background:rgba(255,200,100,.12);border:1px solid var(--gold);box-shadow:0 0 40px rgba(255,170,40,.35),inset 0 0 20px rgba(255,170,40,.1);animation:mh 2.5s ease-in-out infinite alternate}
+.mohni small{display:block;font-family:system-ui,sans-serif;font-size:.8rem;color:var(--mut);margin-top:6px}.mohni .sp{display:inline-block;animation:spk 1.2s infinite alternate}
+@keyframes mh{to{transform:scale(1.04);box-shadow:0 0 60px rgba(255,170,40,.6)}}@keyframes spk{to{transform:scale(1.35) rotate(15deg)}}
+.caret::after{content:"|";margin-left:2px;color:var(--gold);-webkit-text-fill-color:var(--gold);animation:bl .6s steps(1) infinite}@keyframes bl{50%{opacity:0}}
+footer{text-align:center;padding:40px 16px;color:var(--mut);font-size:.85rem}
+.cele{position:fixed;inset:0;z-index:150;pointer-events:none;width:100%;height:100%}
+</style>
+</head>
+<body>
+<header><div class="wrap nav">
+  <a class="logo gold" href="#home">🪔 Diwali Vibes</a>
+  <nav class="links" id="links"></nav>
+  <div class="row sp" style="margin-left:auto;gap:8px;flex-wrap:nowrap;position:relative">
+    <button class="ic" id="bMusic" title="Festive music play/pause">🎵</button>
+    <button class="ic" id="bTheme" title="Toggle theme">🌙</button>
+    <button class="ic" id="bBell" title="Notifications">🔔</button>
+    <div id="bAuth"></div>
+  </div>
+</div></header>
+<main id="view"></main>
+<footer>🪔 Diwali Vibes – Share the Light, Spread the Happiness! 🪔<br>Happy Diwali, Students! Best wishes by Sandeep Sir 🎇 · Made with love &amp; a lot of diyas · Be kind, share responsibly.</footer>
+<button class="btn pulse" id="fab" onclick="A.upload()" title="Share a photo">📸</button>
+<div id="toasts"></div>
+<div id="modalRoot"></div>
+
+<script>
+'use strict';
+/* ===================== UTIL ===================== */
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const h=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-4);
+const now=()=>Date.now();
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const dayKey=()=>new Date().toISOString().slice(0,10);
+const dayNum=()=>Math.floor(Date.now()/864e5);
+function ago(t){const s=(now()-t)/1e3;if(s<60)return'just now';if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago'}
+function toast(m,ms=2800){const t=document.createElement('div');t.className='toast';t.textContent=m;$('#toasts').append(t);setTimeout(()=>t.remove(),ms)}
+function modal(html,big){closeModal();const m=document.createElement('div');m.className='modal'+(big?' big':'');m.innerHTML=`<div class="box"><button class="x" onclick="closeModal()" aria-label="Close">✕</button>${html}</div>`;m.addEventListener('pointerdown',e=>{if(e.target===m)closeModal()});$('#modalRoot').append(m);return m}
+function closeModal(){$('#modalRoot').innerHTML='';document.onkeydown=null}
+async function sha(s){try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('dv:'+s));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}catch{let x=5381;for(const c of 'dv:'+s)x=((x<<5)+x+c.charCodeAt(0))|0;return'f'+x}}
+function readFile(f){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(f)})}
+async function compress(file,max=900,q=.75){const src=await readFile(file);return new Promise((res,rej)=>{const i=new Image();i.onload=()=>{const k=Math.min(1,max/Math.max(i.width,i.height));const c=document.createElement('canvas');c.width=Math.round(i.width*k);c.height=Math.round(i.height*k);c.getContext('2d').drawImage(i,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',q))};i.onerror=()=>rej(new Error('Not a valid image'));i.src=src})}
+const OK_TYPES=['image/jpeg','image/png','image/webp','image/gif'],MAX_MB=5;
+function validImg(f){if(!f)return'Please choose an image.';if(!OK_TYPES.includes(f.type))return'Only JPG, PNG, WEBP or GIF images are allowed.';if(f.size>MAX_MB*1048576)return`Image is too large (max ${MAX_MB} MB).`;return''}
+function copy(t){return navigator.clipboard?.writeText(t).then(()=>toast('Copied! 📋')).catch(()=>toast('Copy failed'))}
+function download(url,name){const a=document.createElement('a');a.href=url;a.download=name;a.click()}
+
+/* ===================== DB (localStorage) ===================== */
+const KEY='diwaliVibes.v1';let db;
+const CATS=['Home Decoration','Diwali Outfits','Rangoli Designs','Diyas & Candles','Family Celebrations','Fireworks','Sweets & Food','Office Diwali Celebration'];
+const scene=(e,a,b)=>{let d='';for(let i=0;i<16;i++)d+=`<circle cx="${rnd(0,600)|0}" cy="${rnd(0,600)|0}" r="${rnd(3,22)|0}" fill="#ffd166" opacity="${rnd(.08,.4).toFixed(2)}"/>`;return'data:image/svg+xml;utf8,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600"><defs><radialGradient id="g" cx=".5" cy=".4" r=".85"><stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${b}"/></radialGradient></defs><rect width="600" height="600" fill="url(#g)"/>${d}<text x="300" y="370" font-size="230" text-anchor="middle">${e}</text></svg>`)};
+async function seed(){
+  const P=await sha('diwali123'),A=await sha('admin123'),t=now();
+  const U=[['admin','👑',A,'admin','Keeping the festival safe & sparkly.'],['priya','🪔',P,'user','Rangoli lover. Sweets enthusiast.'],['aarav','🎆',P,'user','Fireworks photographer.'],['meera','🌸',P,'user','Decor addict. Every corner needs a diya.'],['rohan','🍬',P,'user','Mithai taster-in-chief.']].map(([n,a,p,r,b],i)=>({id:'u'+i,username:n,pass:p,role:r,bio:b,avatar:a,followers:[],following:[],saved:[],stars:r==='admin'?0:20+i*15,banned:false,joined:t-864e5*(10-i),stats:{diyas:0,lanterns:0,rangoli:0,quiz:0,ch:0},chDone:{},quizDate:''}));
+  const S=[['u1','🌼','#ff7a18','#5b1a6e','Rangoli Designs','Finished my doorstep rangoli after 3 hours! #rangoli #diwali2026 #colours'],['u2','🎆','#1b1464','#0a0320','Fireworks','Sky on fire tonight ✨ #fireworks #diwali #nightsky'],['u3','🏮','#ffb347','#7a1f5c','Home Decoration','Balcony ready with fairy lights & lanterns #homedecor #fairylights #diwali'],['u4','🍬','#ffcf70','#a1441a','Sweets & Food','Kaju katli, ladoo & jalebi – all homemade! #mithai #sweets #diwali'],['u1','🪔','#ff9a3c','#40125e','Diyas & Candles','100 diyas lit and counting #diya #lightup #diwali'],['u3','👗','#e0457b','#3a0f5a','Diwali Outfits','Saree day! Gold & maroon #diwalioutfit #ethnicwear #festive'],['u2','👨‍👩‍👧‍👦','#ffd166','#7a3b1a','Family Celebrations','Puja with the whole family #family #diwalipuja #blessings'],['u4','🎉','#ff7a18','#2a0f4a','Office Diwali Celebration','Office party vibes! #officediwali #team #celebrate']];
+  const po=S.map(([u,e,a,b,c,cap],i)=>({id:'p'+i,userId:u,img:scene(e,a,b),caption:cap.replace(/#\S+/g,'').trim(),tags:(cap.match(/#\w+/g)||[]).map(x=>x.toLowerCase()),category:c,likes:U.slice(1,1+(i%4)+1).map(x=>x.id),comments:i%2?[{id:uid(),userId:'u1',text:'Gorgeous! 😍',t:t-36e5*i}]:[],t:t-36e5*(i*3+1),hidden:false}));
+  return{users:U,posts:po,reports:[],notifs:[],session:null,v:1};
+}
+async function load(){try{db=JSON.parse(localStorage.getItem(KEY))}catch{db=null}if(!db||!db.users){db=await seed();save()}ensureGuest()}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(db));return true}catch(e){toast('⚠️ Storage full – delete some posts to free space.');return false}}
+const user=id=>db.users.find(u=>u.id===id)||VU.find(u=>u.id===id);
+const me=()=>db.session?user(db.session):null;
+const post=id=>db.posts.find(p=>p.id===id)||VIRT.find(p=>p.id===id);
+function notify(to,text){if(!to||to===db.session)return;db.notifs.push({id:uid(),to,text,t:now(),read:false})}
+function needAuth(){const u=me();if(!u){toast('Please log in to continue 🪔');authModal();return null}if(u.banned){toast('Your account is suspended.');return null}return u}
+const LVL=[[0,'Diya Starter 🪔'],[50,'Spark ✨'],[150,'Lamp Lighter 🏮'],[300,'Festival Star 🌟'],[600,'Diwali Legend 👑']];
+const lvlOf=s=>{let i=0;LVL.forEach((l,k)=>{if(s>=l[0])i=k});return i};
+function addStars(n,why){const u=me();if(!u)return;const a=lvlOf(u.stars);u.stars+=n;save();toast(`+${n} ⭐ ${why||''}`);if(lvlOf(u.stars)>a){celebrate();toast(`🎉 Level up! You're now ${LVL[lvlOf(u.stars)][1]}`,4500)}updateAuth()}
+const totalLikes=u=>db.posts.filter(p=>p.userId===u.id).reduce((s,p)=>s+p.likes.length,0);
+function badgesOf(u){const b=[],ps=db.posts.filter(p=>p.userId===u.id).length,s=u.stats||{};if(ps>=1)b.push('📸 First Post');if(ps>=5)b.push('🖼️ Gallery Star');if(totalLikes(u)>=10)b.push('❤️ Crowd Favourite');if(u.following.length>=3)b.push('🦋 Social Butterfly');if(s.quiz>=1)b.push('🧠 Quiz Whiz');if(s.rangoli>=1)b.push('🎨 Rangoli Artist');if(s.diyas>=10)b.push('🪔 Diya Master');if(s.ch>=3)b.push('🏆 Challenger');if(s.lanterns>=5)b.push('🏮 Lantern Keeper');if(u.role==='admin')b.push('🛡️ Guardian');return b}
+function av(u,sz=36){if(!u)return`<span class="av" style="width:${sz}px;height:${sz}px">?</span>`;const a=u.avatar||'';if(a.startsWith('data:'))return`<img class="av" style="width:${sz}px;height:${sz}px" src="${a}" alt="">`;return`<span class="av" style="width:${sz}px;height:${sz}px;font-size:${sz*.5}px">${h(a||u.username[0].toUpperCase())}</span>`}
+
+/* ===================== AUDIO ===================== */
+const Snd={ctx:null,sfx:localStorage.getItem('dvSfx')!=='0',music:false,timer:null,
+  init(){if(!this.ctx){try{this.ctx=new(window.AudioContext||window.webkitAudioContext)()}catch{}}if(this.ctx?.state==='suspended')this.ctx.resume()},
+  tone(f,d,type='sine',v=.08,at=0){if(!this.ctx)return;const c=this.ctx,o=c.createOscillator(),g=c.createGain(),t=c.currentTime+at;o.type=type;o.frequency.value=f;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+.02);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g).connect(c.destination);o.start(t);o.stop(t+d+.05)},
+  boom(){if(!this.sfx||!this.ctx)return;const c=this.ctx,n=c.sampleRate*.5,b=c.createBuffer(1,n,c.sampleRate),d=b.getChannelData(0);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,3);const s=c.createBufferSource(),g=c.createGain(),f=c.createBiquadFilter();f.type='lowpass';f.frequency.value=700;g.gain.value=.35;s.buffer=b;s.connect(f).connect(g).connect(c.destination);s.start()},
+  chime(){if(this.sfx&&this.ctx){this.tone(880,.6,'sine',.06);this.tone(1320,.8,'sine',.04,.08)}},
+  toggleMusic(){this.init();this.music=!this.music;$('#bMusic').textContent=this.music?'⏸️':'🎵';clearInterval(this.timer);if(this.music){const sc=[261.6,293.7,329.6,392,440,523.3,587.3,659.3];let i=0,dir=1;this.timer=setInterval(()=>{if(Math.random()<.25)dir=-dir;i=Math.max(0,Math.min(sc.length-1,i+dir*(Math.random()<.6?1:2)));this.tone(sc[i],1.1,'triangle',.05);if(i%4===0)this.tone(sc[0]/2,2,'sine',.04)},520);toast('🎶 Festive music playing')}else toast('Music paused')}};
+document.addEventListener('pointerdown',()=>Snd.init(),{once:true});
+
+/* ===================== FIREWORKS ENGINE ===================== */
+function Fireworks(cv,auto){
+  const c=cv.getContext('2d');let W,H,P=[],R=[],iv;
+  const fit=()=>{W=cv.width=cv.clientWidth||innerWidth;H=cv.height=cv.clientHeight||innerHeight};fit();
+  const ro=new ResizeObserver(fit);ro.observe(cv);
+  function explode(x,y,hue){Snd.boom();const n=90,ring=Math.random()<.4;for(let i=0;i<n;i++){const a=Math.PI*2*i/n+rnd(0,.1),s=ring?4.2:rnd(.8,5);P.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,l:1,h:(hue+rnd(-30,30)+360)%360})}}
+  function launch(x,y){R.push({x:x??rnd(W*.1,W*.9),y:H,ty:y??rnd(H*.12,H*.5),hue:rnd(0,360)})}
+  function tick(){if(!cv.isConnected){ro.disconnect();clearInterval(iv);return}
+    c.globalCompositeOperation='destination-out';c.fillStyle='rgba(0,0,0,.2)';c.fillRect(0,0,W,H);c.globalCompositeOperation='lighter';
+    R=R.filter(r=>{r.y-=8;c.fillStyle='#ffe9a8';c.beginPath();c.arc(r.x,r.y,2.2,0,7);c.fill();if(r.y<=r.ty){explode(r.x,r.y,r.hue);return false}return true});
+    P=P.filter(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.045;p.vx*=.985;p.vy*=.985;p.l-=.011;if(p.l<=0)return false;c.fillStyle=`hsla(${p.h},100%,60%,${p.l})`;c.beginPath();c.arc(p.x,p.y,2.4*p.l+.4,0,7);c.fill();return true});
+    requestAnimationFrame(tick)}
+  tick();if(auto)iv=setInterval(()=>launch(),auto);
+  return{launch}}
+function celebrate(){const cv=document.createElement('canvas');cv.className='cele';document.body.append(cv);const f=Fireworks(cv,0);let k=0;const t=setInterval(()=>{f.launch();if(++k>7){clearInterval(t);setTimeout(()=>cv.remove(),2600)}},320)}
+
+/* ===================== ROUTER ===================== */
+const NAV=[['home','🏠 Home'],['feed','📸 Feed'],['create','✨ Experiences'],['play','🏆 Play'],['profile','👤 Profile']];
+function route(){
+  let[r,arg]=(location.hash||'#home').slice(1).split('/');const V={home:vHome,feed:vFeed,create:vCreate,play:vPlay,profile:vProfile,admin:vAdmin};if(!V[r])r='home';
+  let links=NAV.map(([k,l])=>`<a href="#${k}" class="${k===r?'on':''}">${l}</a>`);links.push(`<a href="#admin" class="${r==='admin'?'on':''}">🛡️ Admin</a>`);
+  $('#links').innerHTML=links.join('');closeModal();$('#view').innerHTML='';window.scrollTo(0,0);V[r]($('#view'),arg)}
+window.addEventListener('hashchange',route);
+function updateAuth(){const u=me();$('#bAuth').innerHTML=u?`<a href="#profile" class="row" style="gap:6px;flex-wrap:nowrap" title="${h(u.username)} · ${u.stars}⭐">${av(u,38)}</a>`:`<button class="btn sm" onclick="authModal()">Login</button>`;const n=u?db.notifs.filter(x=>x.to===u.id&&!x.read).length:0;$('#bBell').innerHTML='🔔'+(n?`<span class="badge">${n}</span>`:'')}
+
+/* ===================== NO LOGIN: automatic local profile ===================== */
+function authModal(){}
+function ensureGuest(){if(db.session&&user(db.session))return;let u=db.users.find(x=>x.guest);if(!u){u={id:uid(),username:'DiwaliFan'+Math.floor(rnd(100,999)),pass:'',role:'user',guest:true,bio:'Spreading light & happiness ✨',avatar:'🪔',followers:[],following:[],saved:[],stars:10,banned:false,joined:now(),stats:{diyas:0,lanterns:0,rangoli:0,quiz:0,ch:0},chDone:{},quizDate:''};db.users.push(u)}db.session=u.id;save()}
+
+/* ===================== HOME ===================== */
+const DIWALI=['2026-11-08','2027-10-29','2028-10-17','2029-11-05'];
+function nextDiwali(){const n=now();for(const d of DIWALI){const t=new Date(d+'T18:00:00').getTime();if(t>n)return t}return n}
+function rangoliSVG(sz,cols){const C=cols||['#ff4d6d','#ffd166','#ff8c1a','#7b2ff7','#06d6a0'];let g='';[[110,50,12,0],[80,36,16,1],[52,24,8,2],[28,14,8,3]].forEach(([r,l,n,ci])=>{for(let i=0;i<n;i++)g+=`<ellipse cx="0" cy="${-r}" rx="${l/3}" ry="${l}" fill="${C[(ci+i)%C.length]}" transform="rotate(${360/n*i})" opacity=".9"/>`;for(let i=0;i<n;i++)g+=`<circle cx="0" cy="${-r-l-8}" r="4" fill="#fff" transform="rotate(${360/n*i+180/n})"/>`});return`<svg width="${sz}" height="${sz}" viewBox="-170 -170 340 340"><g>${g}<circle r="14" fill="#fff"/></g></svg>`}
+function vHome(el){
+  el.innerHTML=`<section class="hero" id="hero">
+  <canvas class="fw"></canvas><div class="lights" id="lights"></div><div class="parts" id="parts"></div>
+  <div class="rang" style="left:-120px;top:20%">${rangoliSVG(420)}</div><div class="rang" style="right:-140px;bottom:0;animation-direction:reverse">${rangoliSVG(480)}</div>
+  <div class="fl" style="left:8%;bottom:90px"><div class="diya"><div class="flame"></div></div></div>
+  <div class="fl" style="right:9%;bottom:140px;animation-delay:-2s"><div class="diya"><div class="flame"></div></div></div>
+  <div class="fl" style="left:20%;bottom:30px;animation-delay:-1s"><div class="candle"><div class="flame"></div></div></div>
+  <div class="fl" style="right:22%;bottom:30px;animation-delay:-3s"><div class="candle" style="height:56px"><div class="flame"></div></div></div>
+  <div class="in"><h1 class="gold">Happy Diwali – Let's Celebrate Together!</h1>
+   <p class="sub">Share your moments, spread happiness and light up the world.</p>
+   <div class="mohni"><div class="tt">🎇 <b class="gold" id="ty1"></b></div><small id="ty2" style="min-height:1.3em"></small></div>
+   <div class="cd" id="cd"></div>
+   <a class="btn pulse" href="#feed" style="font-size:1.1rem;padding:14px 34px">✨ Explore Diwali Vibes</a>
+   <p class="mut" style="margin-top:18px;font-size:.85rem">👆 Tap anywhere on the sky to launch fireworks</p></div></section>
+  <div class="wrap" id="homeRest"></div>`;
+  const hero=$('#hero'),fw=Fireworks($('canvas.fw',hero),1800);
+  hero.addEventListener('pointerdown',e=>{if(e.target.closest('a,button'))return;const r=hero.getBoundingClientRect();fw.launch(e.clientX-r.left,e.clientY-r.top)});
+  const L=$('#lights'),cols=['#ff4d6d','#ffd166','#06d6a0','#4cc9f0','#ff8c1a','#c77dff'],N=Math.ceil(innerWidth/34);
+  for(let i=0;i<N;i++){const x=i/N,i2=document.createElement('i');i2.style.left=x*100+'%';i2.style.top=(14+Math.sin(x*Math.PI*8)*10+(Math.abs(Math.sin(x*Math.PI*8))*8))+'px';i2.style.background=cols[i%6];i2.style.color=cols[i%6];i2.style.animationDelay=(-rnd(0,2))+'s';L.append(i2)}
+  L.insertAdjacentHTML('afterbegin','<svg width="100%" height="50" preserveAspectRatio="none" viewBox="0 0 100 50" style="position:absolute;top:0"><path d="'+Array.from({length:81},(_,i)=>(i?'L':'M')+i*1.25+' '+(8+Math.sin(i/80*Math.PI*8)*9+Math.abs(Math.sin(i/80*Math.PI*8))*5)).join(' ')+'" stroke="#6b4a2b" fill="none" stroke-width=".5"/></svg>');
+  const Pt=$('#parts');for(let i=0;i<36;i++){const s=document.createElement('i');s.style.left=rnd(0,100)+'%';s.style.animationDuration=rnd(7,16)+'s';s.style.animationDelay=(-rnd(0,14))+'s';s.style.transform=`scale(${rnd(.6,1.6)})`;Pt.append(s)}
+  const tickCd=()=>{if(!$('#cd')){clearInterval(cdI);return}const t=nextDiwali()-now(),d=Math.floor(t/864e5),hh=Math.floor(t/36e5)%24,mm=Math.floor(t/6e4)%60,ss=Math.floor(t/1e3)%60;$('#cd').innerHTML=[['Days',d],['Hours',hh],['Mins',mm],['Secs',ss]].map(([l,v])=>`<div><b>${String(v).padStart(2,'0')}</b><span>${l}</span></div>`).join('')};
+  const TY=[['Students Rock! 🚀','Happy Diwali – best wishes by Sandeep Sir 🎇'],['You are my favourite students 💛','Lucky to have students like you! – Sandeep Sir 🪔'],['Happy Diwali, dear Students! 🎇','Best wishes for your bright future – Sandeep Sir 🌟'],['It is a joy to teach you all ✨','May every dream you chase come true 🚀'],['May your models converge & your dreams scale 🪔','Diwali best wishes by Sandeep Sir ✨'],['Debug the darkness, deploy the light 💡','Shubh Deepavali from Sandeep Sir 🪔'],['Keep learning, keep glowing, keep winning 🏆','Happy Diwali, dear Students! – Sandeep Sir 🎆']];
+  (async()=>{const sl=ms=>new Promise(r=>setTimeout(r,ms));const typ=async(el,t,sp)=>{el.classList.add('caret');for(let i=1;i<=t.length;i++){if(!el.isConnected)return false;el.textContent=[...t].slice(0,i).join('');await sl(sp)}el.classList.remove('caret');return true};
+    for(let k=0;;k=(k+1)%TY.length){const e1=$('#ty1'),e2=$('#ty2');if(!e1)return;e1.textContent='';e2.textContent='';if(!await typ(e1,TY[k][0],70))return;await sl(250);if(!await typ(e2,TY[k][1],40))return;await sl(2600);for(let i=0;i<10&&$('#ty1');i++){e2.textContent=[...e2.textContent].slice(0,-4).join('');await sl(25)}e2.textContent='';const t=[...e1.textContent];while(t.length&&$('#ty1')){t.length=Math.max(0,t.length-3);e1.textContent=t.join('');await sl(25)}}})();
+  if(!sessionStorage.getItem('mj')){sessionStorage.setItem('mj','1');setTimeout(()=>{celebrate();toast('🎇 Students Rock! Best wishes by Sandeep Sir 🪔',4500)},900)}
+  tickCd();const cdI=setInterval(tickCd,1000);
+  const visible=db.posts.filter(p=>!p.hidden),pod=photoOfDay();
+  $('#homeRest').innerHTML=`<div class="card glow" style="margin-top:30px;text-align:center;padding:34px 22px"><div style="font-size:2.4rem">💌🪔🎇</div><h2 class="gold" style="margin:8px 0 14px">A special Diwali note for all my Students</h2><p style="max-width:680px;margin:0 auto;font-size:1.08rem;line-height:1.8">Dear Students, Happy Diwali! 🪔<br>You are my favourite students, and I feel truly lucky to have students like you. It is a joy and a blessing to teach you all.<br>May your futures shine as bright as a thousand diyas – full of success, happiness and every dream coming true. Keep learning, keep glowing! ✨</p><p class="gold" style="margin-top:16px;font-size:1.2rem;font-family:Georgia,serif"><b>With love & best wishes, Sandeep Sir</b></p><button class="btn" style="margin-top:16px" onclick="celebrate();Snd.chime()">🎆 Send fireworks</button></div><div class="grid g2" style="margin-top:30px">
+   <div class="card glow"><h3 class="gold">🌟 Photo of the Day</h3>${pod?`<img src="${pod.img}" style="width:100%;border-radius:14px;margin:10px 0;cursor:zoom-in" onclick="A.gallery('${pod.id}')"><p>by <b>${h(user(pod.userId)?.username)}</b> · ❤️ ${pod.likes.length}</p>`:'<p class="empty">No posts yet</p>'}</div>
+   <div class="card"><h3 class="gold">🔥 Trending Hashtags</h3><div class="row" style="margin-top:12px">${trending().map(([t,n])=>`<span class="chip" onclick="A.tag('${t}')">${h(t)} · ${n}</span>`).join('')||'<span class="mut">None yet</span>'}</div>
+   <h3 class="gold" style="margin-top:22px">✨ Dive in</h3><div class="row" style="margin-top:10px"><a class="btn ghost sm" href="#create">🪔 Light a diya</a><a class="btn ghost sm" href="#create">🎨 Make rangoli</a><a class="btn ghost sm" href="#play">🧠 Daily quiz</a><button class="btn sm" onclick="A.upload()">📤 Share a photo</button></div></div></div>
+   <h2 class="sec gold">Fresh from the community</h2><div class="grid g3">${visible.slice().sort((a,b)=>b.t-a.t).slice(0,3).map(postCard).join('')}</div>`;
+}
+function trending(){const m={};db.posts.filter(p=>!p.hidden).forEach(p=>p.tags.forEach(t=>m[t]=(m[t]||0)+1+p.likes.length*.1));return Object.entries(m).sort((a,b)=>b[1]-a[1]).slice(0,10).map(([t,n])=>[t,Math.round(n*10)/10|0||1])}
+function photoOfDay(){const v=db.posts.filter(p=>!p.hidden);if(!v.length)return null;const rec=v.filter(p=>now()-p.t<864e5*2);return(rec.length?rec:v).slice().sort((a,b)=>b.likes.length-a.likes.length)[0]}
+
+/* ===================== FEED ===================== */
+let F={q:'',cat:'All',sort:'latest',saved:false};
+function postCard(p){const u=user(p.userId),m=me(),liked=m&&p.likes.includes(m.id),sv=m&&m.saved.includes(p.id);
+  return`<article class="card post" id="post-${p.id}"><div class="ph"><a onclick="location.hash='#profile/${p.userId}'">${av(u,36)}<b>${h(p.author||u?.username||'deleted')}</b></a><span class="chip" onclick="A.cat('${h(p.category).replace(/'/g,"\\'")}')">${h(p.category)}</span></div>
+  <img loading="lazy" style="aspect-ratio:${[1,1.2,.85,1.1][parseInt(p.id.slice(-1),36)%4]}" src="${p.img}" alt="${h(p.caption)}" onclick="A.gallery('${p.id}')" ondblclick="A.like('${p.id}')">
+  <div class="acts"><button class="${liked?'on':''}" onclick="A.like('${p.id}')">${liked?'❤️':'🤍'} ${p.likes.length}</button><button onclick="A.toggleC('${p.id}')">💬 ${p.comments.length}</button><button onclick="A.share('${p.id}')">🔗 Share</button><button class="sv ${sv?'on':''}" onclick="A.save('${p.id}')">${sv?'★':'☆'} Save</button><button onclick="A.report('${p.id}')" style="margin-left:auto" title="Report">🚩</button>${m&&(m.id===p.userId||m.role==='admin')?`<button onclick="A.del('${p.id}')" title="Delete">🗑️</button>`:''}</div>
+  <div class="cap"><b>${h(p.author||u?.username||'')}</b> ${h(p.caption)} ${p.tags.map(t=>`<span class="tag" onclick="A.tag('${h(t)}')">${h(t)}</span>`).join(' ')}<div class="mut" style="font-size:.72rem;margin-top:4px">${ago(p.t)}</div></div>
+  <div class="cm" id="cm-${p.id}" style="display:none">${p.comments.map(c=>`<p><b>${h(user(c.userId)?.username||'user')}</b> ${h(c.text)}</p>`).join('')||'<p class="mut">Be the first to comment ✨</p>'}<form onsubmit="return A.comment(event,'${p.id}')"><input placeholder="Add a comment…" maxlength="200" required><button class="btn sm">Post</button></form></div></article>`}
+function filtered(){const m=me();let l=db.posts.filter(p=>!p.hidden&&!user(p.userId)?.banned);if(F.cat!=='All')l=l.filter(p=>p.category===F.cat);if(F.saved)l=l.filter(p=>m?.saved.includes(p.id));const q=F.q.trim().toLowerCase();if(q)l=l.filter(p=>p.tags.some(t=>t.includes(q.replace('#','')))||p.caption.toLowerCase().includes(q)||user(p.userId)?.username.toLowerCase().includes(q));return l.sort((a,b)=>F.sort==='popular'?(b.likes.length+b.comments.length)-(a.likes.length+a.comments.length):b.t-a.t)}
+function vFeed(el){
+  el.innerHTML=`<div class="wrap"><div class="row" style="margin:24px 0 10px;justify-content:space-between"><h2 class="gold" style="font-size:2rem">📸 Diwali Gallery</h2><button class="btn" onclick="A.upload()">📤 Upload photo</button></div>
+  <div class="row" style="margin-bottom:12px"><input id="fq" placeholder="🔍 Search #hashtags, captions, people…" value="${h(F.q)}" style="flex:1;min-width:200px"><select id="fs" style="width:auto"><option value="latest">🕒 Latest</option><option value="popular">🔥 Most popular</option></select><button class="chip ${F.saved?'on':''}" id="fsv">★ Saved</button></div>
+  <div class="stories">${db.users.filter(x=>!x.banned).slice(0,12).map(x=>`<a onclick="A.profile('${x.id}')"><span class="ring">${av(x,56)}</span><small>${h(x.username.slice(0,9))}</small></a>`).join('')}</div><div class="row" style="margin-bottom:18px">${['All',...CATS].map(c=>`<span class="chip ${F.cat===c?'on':''}" data-c="${h(c)}">${h(c)}</span>`).join('')}</div>
+  <div class="mas" id="feedG"></div><div id="sent" class="mut" style="text-align:center;padding:26px;font-size:1.2rem">🪔</div></div>`;
+  $('#fs').value=F.sort;let T;$('#fq').oninput=e=>{clearTimeout(T);T=setTimeout(()=>{F.q=e.target.value;renderFeed()},250)};$('#fs').onchange=e=>{F.sort=e.target.value;renderFeed()};
+  $('#fsv').onclick=()=>{if(!F.saved&&!needAuth())return;F.saved=!F.saved;$('#fsv').classList.toggle('on',F.saved);renderFeed()};
+  $$('[data-c]').forEach(c=>c.onclick=()=>{F.cat=c.dataset.c;$$('[data-c]').forEach(x=>x.classList.toggle('on',x===c));renderFeed()});
+  renderFeed(true)}
+const FEED={list:[],i:0,shown:[],obs:null,busy:false};
+const VIRT=[],VU=[];
+const SCN={'Home Decoration':['🏮','🏠','✨'],'Diwali Outfits':['👗','🥻','👘'],'Rangoli Designs':['🌼','🎨','🌸'],'Diyas & Candles':['🪔','🕯️','🔥'],'Family Celebrations':['👨‍👩‍👧‍👦','🙏','🎊'],'Fireworks':['🎆','🎇','✨'],'Sweets & Food':['🍬','🍮','🥮'],'Office Diwali Celebration':['🎉','💼','🪩']};
+const PAL=[['#ff7a18','#40125e'],['#ffcf70','#a1441a'],['#e0457b','#3a0f5a'],['#1b1464','#0a0320'],['#ffb347','#7a1f5c'],['#06d6a0','#1b1464'],['#ff9a3c','#2a0f4a']];
+const VN=['aarav_k','ishita.m','kabir','ananya_s','vihaan','neha.d','arjun_r','sara_j','tara','veer.s','mira_p','dev_a','kiara','zoya_h','rahul.t'],VC=['Celebrating with all my heart','So much light and love tonight','Can’t stop smiling – Diwali magic!','Every corner glowing','Tradition meets joy','This year’s favourite moment','Home sweet glowing home','Light over darkness','Made this with family','Pure festive happiness'],VT=['#diwali','#lightup','#festivevibes','#happydiwali','#shubhdeepavali','#glow','#celebrate','#joy'];
+function genVirt(n){const out=[];for(let k=0;k<n;k++){let u=(VU.length<14&&Math.random()<.5)||!VU.length?null:pick(VU);if(!u){u={id:'v'+uid(),username:pick(VN)+Math.floor(rnd(1,99)),avatar:pick(['🪔','🎆','🌸','🏮','✨','🍬','🎨']),bio:'Diwali lover ✨',role:'user',followers:[],following:[],saved:[],stats:{},stars:Math.floor(rnd(20,300)),joined:now()};VU.push(u)}
+  const c=F.cat!=='All'?F.cat:pick(CATS),[a,b]=pick(PAL),tags=[...new Set([pick(VT),pick(VT),'#'+c.split(' ')[0].toLowerCase()])];
+  const p={id:'x'+uid(),userId:u.id,img:scene(pick(SCN[c]),a,b),caption:pick(VC),tags,category:c,likes:Array.from({length:Math.floor(rnd(0,40))},(_,i)=>'z'+i),comments:[],t:now()-rnd(36e5,864e6),hidden:false,virtual:true};VIRT.push(p);out.push(p)}return out}
+function loadMore(){const g=$('#feedG');if(!g||FEED.busy)return;FEED.busy=true;let items=FEED.list.slice(FEED.i,FEED.i+6);FEED.i+=items.length;
+  if(items.length<6&&!F.q.trim()&&!F.saved)items=items.concat(genVirt(6-items.length));
+  if(!items.length){$('#sent').textContent=FEED.shown.length?'🪔 You’ve reached the end — Happy Diwali!':'';FEED.busy=false;return}
+  FEED.shown.push(...items);g.insertAdjacentHTML('beforeend',items.map(postCard).join(''));FEED.busy=false;
+  setTimeout(()=>{const s=$('#sent');if(s&&$('#feedG')&&s.getBoundingClientRect().top<innerHeight+800)loadMore()},80)}
+function renderFeed(first){const g=$('#feedG');if(!g)return;FEED.obs?.disconnect();g.innerHTML=Array(4).fill('<div class="skel"></div>').join('');$('#sent').textContent='🪔';
+  setTimeout(()=>{const g2=$('#feedG');if(!g2)return;FEED.list=filtered();FEED.i=0;FEED.shown=[];g2.innerHTML='';
+    if(!FEED.list.length&&(F.q.trim()||F.saved)){g2.innerHTML='<div class="empty" style="column-span:all"><big>🪔</big><h3>No posts found</h3><p>Try another search or share the first photo!</p></div>';$('#sent').textContent='';return}
+    loadMore();FEED.obs=new IntersectionObserver(es=>{if(es[0].isIntersecting)loadMore()},{rootMargin:'800px'});FEED.obs.observe($('#sent'))},first?450:200)}
+function sky(){if($('#sky'))return;const s=document.createElement('div');s.id='sky';for(let i=0;i<70;i++){const d=document.createElement('i');d.style.cssText=`left:${rnd(0,100)}%;top:${rnd(0,100)}%;width:${rnd(1,3)}px;height:${rnd(1,3)}px;animation-delay:${-rnd(0,4)}s;animation-duration:${rnd(2,5)}s`;s.append(d)}document.body.prepend(s)}
+function refreshPost(id){const p=post(id),old=$('#post-'+id);if(old&&p){const open=$('#cm-'+id)?.style.display!=='none';old.outerHTML=postCard(p);if(open)$('#cm-'+id).style.display='block'}}
+const A={
+  like(id){const u=needAuth();if(!u)return;const p=post(id),i=p.likes.indexOf(u.id);if(i>-1)p.likes.splice(i,1);else{p.likes.push(u.id);notify(p.userId,`${u.username} liked your photo ❤️`);const l=p.likes.length;if([10,25,50,100].includes(l)&&p.userId===u.id)celebrate()}save();refreshPost(id);updateAuth()},
+  toggleC(id){const e=$('#cm-'+id);e.style.display=e.style.display==='none'?'block':'none'},
+  comment(ev,id){ev.preventDefault();const u=needAuth();if(!u)return false;const i=ev.target.querySelector('input'),t=i.value.trim();if(!t)return false;const p=post(id);p.comments.push({id:uid(),userId:u.id,text:t.slice(0,200),t:now()});notify(p.userId,`${u.username} commented: “${t.slice(0,40)}”`);save();refreshPost(id);$('#cm-'+id).style.display='block';updateAuth();return false},
+  save(id){const u=needAuth();if(!u)return;const i=u.saved.indexOf(id);i>-1?u.saved.splice(i,1):u.saved.push(id);save();refreshPost(id);toast(i>-1?'Removed from saved':'Saved ★')},
+  share(id){const p=post(id),txt=`${p.caption} ${p.tags.join(' ')} — on Diwali Vibes 🪔`;if(navigator.share)navigator.share({title:'Diwali Vibes',text:txt,url:location.href.split('#')[0]}).catch(()=>{});else{copy(txt+' '+location.href.split('#')[0])}},
+  report(id){const u=needAuth();if(!u)return;const m=modal(`<h3 class="gold">🚩 Report this post</h3><form id="rf"><label>Reason</label><select name="r"><option>Inappropriate content</option><option>Spam</option><option>Harassment</option><option>Not Diwali related</option><option>Other</option></select><br><br><button class="btn danger" style="width:100%">Submit report</button></form>`);$('#rf',m).onsubmit=e=>{e.preventDefault();if(db.reports.some(r=>r.postId===id&&r.by===u.id&&!r.done)){closeModal();return toast('You already reported this.')}db.reports.push({id:uid(),postId:id,by:u.id,reason:new FormData(e.target).get('r'),t:now(),done:false});save();closeModal();toast('Thanks – our moderators will review it.')}},
+  del(id){if(!confirm('Delete this post permanently?'))return;db.posts=db.posts.filter(p=>p.id!==id);db.reports=db.reports.filter(r=>r.postId!==id);save();toast('Post deleted');route()},
+  tag(t){F.q=t;F.cat='All';location.hash='#feed';if(cur()==='feed')vFeed($('#view'))},
+  cat(c){F.cat=c;if(cur()!=='feed')location.hash='#feed';else vFeed($('#view'))},
+  profile(id){location.hash='#profile/'+id},
+  gallery(id){const list=(cur()==='feed'?FEED.shown:db.posts.filter(p=>!p.hidden));let i=Math.max(0,list.findIndex(p=>p.id===id));const show=()=>{const p=list[i],u=user(p.userId);modal(`<div class="gal"><img src="${p.img}" alt=""><button class="nv" style="left:6px" onclick="G(-1)">‹</button><button class="nv" style="right:6px" onclick="G(1)">›</button><p style="margin-top:10px"><b>${h(p.author||u?.username)}</b> ${h(p.caption)}</p><p class="gold">${p.tags.map(h).join(' ')}</p><p class="mut">❤️ ${p.likes.length} · 💬 ${p.comments.length} · ${i+1}/${list.length}</p></div>`,true);document.onkeydown=e=>{if(e.key==='ArrowRight')G(1);if(e.key==='ArrowLeft')G(-1);if(e.key==='Escape')closeModal()}};window.G=d=>{i=(i+d+list.length)%list.length;show()};if(list.length)show()},
+  upload(){const u=needAuth();if(!u)return;let data='';const m=modal(`<h3 class="gold">📤 Share your Diwali moment</h3><form id="uf"><label>Photo (JPG/PNG/WEBP/GIF, max ${MAX_MB} MB)</label><input type="file" id="uff" accept="image/*"><img id="upv" style="width:100%;border-radius:12px;margin-top:8px;display:none">
+   <label>Your name (shown on your photo)</label><input name="nm" maxlength="30" required value="${h(u.lastName||u.username)}" placeholder="e.g. Sandeep Kumar"><label>Category</label><select name="c">${CATS.map(c=>`<option>${c}</option>`).join('')}</select><label>Caption (add #hashtags)</label><textarea name="cap" rows="3" maxlength="300" placeholder="Lighting up the night… #diwali #diya"></textarea><p id="ue" style="color:#ff6b81;font-size:.85rem;min-height:20px;margin-top:6px"></p><button class="btn" style="width:100%" id="ub">Post 🪔</button></form>`);
+   $('#uff',m).onchange=async e=>{const f=e.target.files[0],er=validImg(f),E=$('#ue',m);E.textContent=er;data='';if(er)return;try{data=await compress(f);const pv=$('#upv',m);pv.src=data;pv.style.display='block'}catch(x){E.textContent=x.message}};
+   $('#uf',m).onsubmit=e=>{e.preventDefault();const E=$('#ue',m);if(!data)return E.textContent='Please choose a valid image first.';const f=new FormData(e.target),nm=(f.get('nm')||'').trim().replace(/\s+/g,' ');if(!/^[\p{L}\p{N} ._-]{2,30}$/u.test(nm))return E.textContent='Please enter your name (2–30 letters or numbers).';u.lastName=nm;const cap=f.get('cap').trim(),tags=[...new Set((cap.match(/#\w+/g)||[]).map(t=>t.toLowerCase()))].slice(0,8);if(!tags.length)tags.push('#diwali');const p={id:uid(),userId:u.id,author:nm,img:data,caption:cap.replace(/#\w+/g,'').trim().slice(0,300),tags,category:f.get('c'),likes:[],comments:[],t:now(),hidden:false};db.posts.push(p);if(!save()){db.posts.pop();return E.textContent='Storage full. Try a smaller image.'}closeModal();addStars(5,'for sharing a photo');toast('Posted! 🎉');if(db.posts.filter(x=>x.userId===u.id).length===1)celebrate();location.hash==='#feed'?vFeed($('#view')):location.hash='#feed'}}
+};
+const cur=()=>(location.hash||'#home').slice(1).split('/')[0];
+
+/* ===================== EXPERIENCES ===================== */
+let EXP='diya';
+const WISH=['May the glow of Diwali brighten every corner of your life, {n}! ✨','{n}, may Goddess Lakshmi bless your home with endless joy and prosperity. 🪔','Wishing you a Diwali sparkling with happiness, love and sweets, {n}! 🍬','May every diya you light chase away a worry, {n}. Happy Diwali! 🏮','Light up your heart, light up your home — Happy Diwali, {n}! 🎆','{n}, may this festival of lights fill your days with new hope and your nights with stars. 🌟','Sending you warm wishes, bright smiles and a lot of laddoos, {n}! Shubh Deepavali! 🙏','May your life be as colourful as rangoli and as bright as a thousand diyas, {n}! 🎨','Let the lights of Diwali guide you to success and peace, {n}. 🪔','Happy Diwali, {n}! Burn the crackers of joy and the diyas of kindness. 🎇'];
+const LANT=['Peace begins with a single light.','You are loved more than you know.','Good things are coming your way.','Kindness is the brightest flame.','Be the light in someone’s darkness.','Every end is a glowing new beginning.','Gratitude turns little into plenty.','May your dreams rise higher than the stars.','Share your sweets, share your smile.','Today, choose joy.'];
+function vCreate(el){
+  const T=[['diya','🪔 Light Diyas'],['rangoli','🎨 Rangoli Creator'],['wish','💌 Wishes & Cards'],['lantern','🏮 Sky Lanterns'],['fw','🎆 Fireworks']];
+  el.innerHTML=`<div class="wrap"><h2 class="sec gold" style="margin-top:24px">✨ Interactive Diwali Experiences</h2><div class="tabs">${T.map(([k,l])=>`<span class="chip ${EXP===k?'on':''}" data-t="${k}">${l}</span>`).join('')}</div><div id="exp"></div></div>`;
+  $$('[data-t]').forEach(c=>c.onclick=()=>{EXP=c.dataset.t;vCreate(el)});
+  ({diya:xDiya,rangoli:xRangoli,wish:xWish,lantern:xLantern,fw:xFw})[EXP]($('#exp'))}
+function xDiya(el){let n=0;el.innerHTML=`<div class="stage" id="ds"><div class="hint">Tap anywhere to light a diya 🪔 — place as many as you like</div></div><div class="row" style="margin-top:12px"><b>Diyas lit: <span id="dn" class="gold">0</span></b><button class="btn ghost sm" id="dc">🧹 Clear</button></div>`;
+  const s=$('#ds');s.onpointerdown=e=>{const r=s.getBoundingClientRect(),d=document.createElement('div');d.className='sd';d.style.left=(e.clientX-r.left)+'px';d.style.top=(e.clientY-r.top+30)+'px';d.innerHTML='<div class="diya"><div class="flame"></div></div>';s.append(d);Snd.chime();$('#dn').textContent=++n;const u=me();if(u){u.stats.diyas++;save();if(u.stats.diyas%10===0)addStars(2,'for lighting 10 diyas')}};
+  $('#dc').onclick=()=>{$$('.sd',s).forEach(x=>x.remove());n=0;$('#dn').textContent=0}}
+function xRangoli(el){const COL=['#ff4d6d','#ffd166','#ff8c1a','#7b2ff7','#06d6a0','#4cc9f0','#ffffff','#ff70a6'];let col=COL[0],pat='petal',sym=8,size=14,down=false,last=null;
+  el.innerHTML=`<div class="grid g2" style="grid-template-columns:minmax(300px,440px) 1fr"><canvas id="rc" width="440" height="440" style="width:100%;max-width:440px;border-radius:20px;border:1px solid var(--bd);background:#14072a;touch-action:none;cursor:crosshair"></canvas>
+  <div class="card"><h3 class="gold">Design controls</h3><label>Colour</label><div class="row" id="sw">${COL.map(c=>`<span class="swatch ${c===col?'on':''}" style="background:${c}" data-c="${c}"></span>`).join('')}<input type="color" id="cp" value="${col}" style="width:42px;padding:2px;height:34px"></div>
+  <label>Pattern</label><div class="row" id="pt">${[['petal','🌸 Petal'],['dot','⚪ Dot'],['star','⭐ Star'],['line','〰️ Line']].map(([k,l])=>`<span class="chip ${k===pat?'on':''}" data-p="${k}">${l}</span>`).join('')}</div>
+  <label>Symmetry: <b id="sl">8</b></label><input type="range" id="sy" min="3" max="16" value="8"><label>Brush size: <b id="bl">14</b></label><input type="range" id="bs" min="4" max="34" value="14">
+  <div class="row" style="margin-top:16px"><button class="btn ghost sm" id="rcl">🧹 Clear</button><button class="btn sm" id="rdl">⬇️ Download</button><button class="btn ghost sm" id="rpost">📤 Share to feed</button></div><p class="mut" style="font-size:.82rem;margin-top:10px">Draw with finger or mouse — your strokes repeat around the centre!</p></div></div>`;
+  const cv=$('#rc'),c=cv.getContext('2d');const bg=()=>{c.fillStyle='#14072a';c.fillRect(0,0,440,440);c.strokeStyle='rgba(255,209,102,.18)';for(let r=40;r<220;r+=40){c.beginPath();c.arc(220,220,r,0,7);c.stroke()}};bg();
+  const stamp=(x,y,px,py)=>{const dx=x-220,dy=y-220;for(let k=0;k<sym;k++)for(const mir of[1,-1]){const a=Math.PI*2*k/sym;c.save();c.translate(220,220);c.rotate(a);c.scale(mir,1);c.fillStyle=c.strokeStyle=col;c.shadowColor=col;c.shadowBlur=8;
+      if(pat==='dot'){c.beginPath();c.arc(dx,dy,size/2,0,7);c.fill()}
+      else if(pat==='petal'){c.translate(dx,dy);c.rotate(Math.atan2(dy,dx)+Math.PI/2);c.beginPath();c.ellipse(0,0,size/3,size,0,0,7);c.fill()}
+      else if(pat==='star'){c.translate(dx,dy);c.beginPath();for(let i=0;i<10;i++){const r=i%2?size/2.2:size;c.lineTo(Math.cos(i*Math.PI/5)*r,Math.sin(i*Math.PI/5)*r)}c.closePath();c.fill()}
+      else{if(px!=null){c.lineWidth=size/2;c.lineCap='round';c.beginPath();c.moveTo(px-220,py-220);c.lineTo(dx,dy);c.stroke()}}c.restore()}};
+  const pos=e=>{const r=cv.getBoundingClientRect();return[(e.clientX-r.left)*440/r.width,(e.clientY-r.top)*440/r.height]};
+  cv.onpointerdown=e=>{down=true;cv.setPointerCapture(e.pointerId);const[x,y]=pos(e);last=[x,y];stamp(x,y,null)};
+  cv.onpointermove=e=>{if(!down)return;const[x,y]=pos(e);if(pat!=='line'&&Math.hypot(x-last[0],y-last[1])<size*.9)return;stamp(x,y,last[0],last[1]);last=[x,y]};
+  cv.onpointerup=()=>down=false;
+  $$('#sw .swatch').forEach(s=>s.onclick=()=>{col=s.dataset.c;$$('#sw .swatch').forEach(x=>x.classList.toggle('on',x===s));$('#cp').value=col});$('#cp').oninput=e=>{col=e.target.value;$$('#sw .swatch').forEach(x=>x.classList.remove('on'))};
+  $$('#pt .chip').forEach(s=>s.onclick=()=>{pat=s.dataset.p;$$('#pt .chip').forEach(x=>x.classList.toggle('on',x===s))});
+  $('#sy').oninput=e=>{sym=+e.target.value;$('#sl').textContent=sym};$('#bs').oninput=e=>{size=+e.target.value;$('#bl').textContent=size};$('#rcl').onclick=bg;
+  $('#rdl').onclick=()=>{download(cv.toDataURL('image/png'),'my-rangoli.png');const u=me();if(u){u.stats.rangoli++;save();addStars(5,'for your rangoli')}};
+  $('#rpost').onclick=()=>{const u=needAuth();if(!u)return;const d=cv.toDataURL('image/jpeg',.8);db.posts.push({id:uid(),userId:u.id,img:d,caption:'My digital rangoli 🎨',tags:['#rangoli','#digitalrangoli','#diwali'],category:'Rangoli Designs',likes:[],comments:[],t:now(),hidden:false});if(save()){addStars(5,'for sharing rangoli');location.hash='#feed'}}}
+function xWish(el){let cur='';el.innerHTML=`<div class="grid g2"><div class="card glow"><h3 class="gold">💌 Diwali Wishes Generator</h3><label>Your name or friend's name</label><input id="wn" maxlength="30" placeholder="e.g. Priya & Family" value="Students"><div class="row" style="margin-top:14px"><button class="btn" id="wg">✨ Generate wish</button></div><div id="wo" class="card" style="margin-top:14px;font-size:1.1rem;min-height:90px"></div><div class="row" style="margin-top:12px"><button class="btn ghost sm" id="wc">📋 Copy</button><button class="btn ghost sm" id="ws">📲 Share</button><button class="btn sm" id="wd">🖼️ Download card</button></div></div><div><canvas id="gc" width="800" height="500" style="width:100%;border-radius:20px;border:1px solid var(--bd)"></canvas></div></div>`;
+  const draw=()=>{const cv=$('#gc'),c=cv.getContext('2d'),g=c.createLinearGradient(0,0,800,500);g.addColorStop(0,'#2a0f4a');g.addColorStop(1,'#b3411a');c.fillStyle=g;c.fillRect(0,0,800,500);for(let i=0;i<60;i++){c.fillStyle=`rgba(255,209,102,${rnd(.1,.7)})`;c.beginPath();c.arc(rnd(0,800),rnd(0,500),rnd(1,4),0,7);c.fill()}c.strokeStyle='#ffd166';c.lineWidth=4;c.strokeRect(20,20,760,460);c.strokeStyle='rgba(255,209,102,.4)';c.strokeRect(32,32,736,436);c.textAlign='center';c.font='64px serif';c.fillText('🪔  ✨  🪔',400,115);c.fillStyle='#ffd166';c.font='bold 54px Georgia,serif';c.fillText('Happy Diwali!',400,200);c.fillStyle='#fff';c.font='24px Georgia,serif';const words=(cur||'Click “Generate wish” to create your greeting').split(' ');let line='',y=260;words.forEach(w=>{if(c.measureText(line+w).width>600){c.fillText(line,400,y);line='';y+=36}line+=w+' '});c.fillText(line,400,y);c.fillStyle='#ffd166';c.font='italic 20px Georgia';c.fillText('— Best wishes, Sandeep Sir —',400,455)};
+  $('#wg').onclick=()=>{const n=$('#wn').value.trim()||'friend';cur=pick(WISH).replace(/\{n\}/g,n);$('#wo').textContent=cur;draw();Snd.chime()};
+  $('#wc').onclick=()=>cur?copy(cur):toast('Generate a wish first');$('#ws').onclick=()=>{if(!cur)return toast('Generate a wish first');navigator.share?navigator.share({text:cur}).catch(()=>{}):copy(cur)};
+  $('#wd').onclick=()=>{if(!cur)return toast('Generate a wish first');download($('#gc').toDataURL('image/png'),'diwali-greeting.png')};draw()}
+function xLantern(el){let n=0;el.innerHTML=`<div class="stage" id="ls" style="background:linear-gradient(#050118,#1b0b44 80%,#3a1a50)"><div class="hint">Release a sky lantern — each carries a message of hope</div></div><div class="row" style="margin-top:12px"><button class="btn" id="lr">🏮 Release a lantern</button><b>Released: <span id="ln" class="gold">0</span></b></div>`;
+  const s=$('#ls');for(let i=0;i<50;i++){const d=document.createElement('i');d.style.cssText=`position:absolute;left:${rnd(0,100)}%;top:${rnd(0,90)}%;width:2px;height:2px;background:#fff;border-radius:50%;opacity:${rnd(.3,1)}`;s.append(d)}
+  const rel=x=>{const l=document.createElement('div'),dur=rnd(9,14);l.className='lan';l.style.left=(x??rnd(8,85))+'%';l.style.setProperty('--dx',rnd(-80,80)+'px');l.style.animationDuration=dur+'s';l.innerHTML=`🔥<span>${pick(LANT)}</span>`;s.append(l);setTimeout(()=>l.remove(),dur*1e3);Snd.chime();$('#ln').textContent=++n;const u=me();if(u){u.stats.lanterns++;save();if(u.stats.lanterns%5===0)addStars(3,'for 5 lanterns')}};
+  $('#lr').onclick=()=>rel();s.onpointerdown=e=>{const r=s.getBoundingClientRect();rel((e.clientX-r.left)/r.width*100-4)}}
+function xFw(el){el.innerHTML=`<div class="stage" id="fs2" style="cursor:pointer"><canvas id="fwc"></canvas><div class="hint">Click or tap anywhere to launch fireworks 🎆</div></div><div class="row" style="margin-top:12px"><button class="btn ghost" id="fm">${Snd.sfx?'🔊 Sound on':'🔇 Muted'}</button><button class="btn" id="fa">🎇 Finale!</button></div>`;
+  const cv=$('#fwc'),f=Fireworks(cv,0);cv.parentElement.onpointerdown=e=>{const r=cv.getBoundingClientRect();f.launch(e.clientX-r.left,e.clientY-r.top)};
+  $('#fm').onclick=e=>{Snd.sfx=!Snd.sfx;localStorage.setItem('dvSfx',Snd.sfx?'1':'0');e.target.textContent=Snd.sfx?'🔊 Sound on':'🔇 Muted'};$('#fa').onclick=()=>{for(let i=0;i<9;i++)setTimeout(()=>f.launch(),i*180)}}
+
+/* ===================== PLAY (gamification) ===================== */
+const CHALL=['Light 5 diyas in Virtual Diya Lighting','Post a photo of your home decoration','Create & download a rangoli','Send a Diwali wish to 3 people','Comment kindly on 3 posts','Release 5 sky lanterns','Share a sweet recipe or photo'];
+const QZ=[['Diwali is also known as the…?',['Festival of Lights','Festival of Colours','Harvest Festival'],0],['Which goddess is worshipped on Diwali?',['Saraswati','Lakshmi','Durga'],1],['Small clay lamps lit on Diwali are called?',['Diyas','Toranas','Kolams'],0],['Colourful floor art made at Diwali is called?',['Rangoli','Origami','Mehndi'],0],['Which epic tells of Rama’s return to Ayodhya?',['Mahabharata','Ramayana','Panchatantra'],1],['Diwali falls in which Hindu month (north India, amanta)?',['Kartika','Magha','Shravana'],0],['Which day of the 5-day festival is Dhanteras?',['First','Third','Last'],0],['"Bhai Dooj" celebrates the bond between…?',['Friends','Siblings','Neighbours'],1],['Diwali is celebrated in which religions?',['Hindu, Jain, Sikh & Buddhist (Newar)','Only Hindu','None'],0],['Which sweet is a Diwali favourite?',['Kaju katli','Tiramisu','Baklava'],0],['Sparkling lights strung on homes are called?',['Fairy lights','Torches','Lanterns'],0],['Which colour is considered auspicious at Diwali?',['Gold & saffron','Grey','Black'],0]];
+function vPlay(el){
+  const u=me(),d=dayNum(),ch=CHALL[d%CHALL.length],done=u?.chDone[dayKey()];
+  const qs=[0,1,2,3,4].map(i=>QZ[(d*3+i*2)%QZ.length]);
+  const lb=db.users.filter(x=>!x.banned&&x.id!=='u0').map(x=>({u:x,s:x.stars+totalLikes(x)*2+db.posts.filter(p=>p.userId===x.id).length*5})).sort((a,b)=>b.s-a.s).slice(0,10);
+  const contest=cat=>db.posts.filter(p=>!p.hidden&&p.category===cat).sort((a,b)=>b.likes.length-a.likes.length).slice(0,3);
+  el.innerHTML=`<div class="wrap"><h2 class="sec gold" style="margin-top:24px">🏆 Play, Compete & Collect Stars</h2>
+  <div class="grid g2"><div class="card glow"><h3 class="gold">📅 Today's Challenge</h3><p style="font-size:1.15rem;margin:12px 0">${h(ch)}</p>${u?`<button class="btn" id="chb" ${done?'disabled style="opacity:.6"':''}>${done?'✅ Completed':'Mark complete (+10 ⭐)'}</button>`:`<button class="btn" onclick="authModal()">Log in to play</button>`}<p class="mut" style="font-size:.8rem;margin-top:10px">Tip: tag your post #DailyChallenge</p></div>
+  <div class="card"><h3 class="gold">⭐ Your progress</h3>${u?progress(u):'<p class="mut" style="margin-top:10px">Log in to collect stars, level up and earn badges.</p>'}</div></div>
+  <div class="grid g2" style="margin-top:18px"><div class="card quiz" id="qz"></div>
+  <div class="card"><h3 class="gold">🥇 Community Leaderboard</h3><table style="margin-top:8px">${lb.map((r,i)=>`<tr><td>${['🥇','🥈','🥉'][i]||i+1}</td><td><a onclick="A.profile('${r.u.id}')" class="row" style="gap:8px">${av(r.u,28)} ${h(r.u.username)}</a></td><td class="gold">${r.s} pts</td></tr>`).join('')}</table></div></div>
+  <h2 class="sec gold">🎪 Contests</h2><div class="grid g2">${['Rangoli Designs','Home Decoration'].map(c=>`<div class="card"><h3 class="gold">${c==='Rangoli Designs'?'🎨 Best Rangoli':'🏠 Best Home Decoration'}</h3>${contest(c).map((p,i)=>`<div class="row" style="margin-top:10px;cursor:pointer" onclick="A.gallery('${p.id}')"><span style="font-size:1.4rem">${['🥇','🥈','🥉'][i]}</span><img src="${p.img}" style="width:56px;height:56px;border-radius:10px;object-fit:cover"><span><b>${h(user(p.userId)?.username)}</b><br><span class="mut" style="font-size:.8rem">❤️ ${p.likes.length}</span></span></div>`).join('')||'<p class="mut">No entries yet — upload yours!</p>'}<button class="btn ghost sm" style="margin-top:14px" onclick="A.upload()">Enter contest</button></div>`).join('')}</div>
+  <h2 class="sec gold">🔥 Trending</h2><div class="row">${trending().map(([t,n])=>`<span class="chip" onclick="A.tag('${t}')">${h(t)} · ${n}</span>`).join('')}</div></div>`;
+  $('#chb')?.addEventListener('click',()=>{u.chDone[dayKey()]=true;u.stats.ch++;save();addStars(10,'challenge complete');vPlay(el)});
+  quiz($('#qz'),qs,u)}
+function progress(u){const i=lvlOf(u.stars),nx=LVL[i+1],pct=nx?(u.stars-LVL[i][0])/(nx[0]-LVL[i][0])*100:100;return`<p style="margin:10px 0"><b style="font-size:1.4rem" class="gold">${u.stars} ⭐</b> · ${LVL[i][1]}</p><div class="bar"><i style="width:${pct}%"></i></div><p class="mut" style="font-size:.8rem;margin:6px 0 12px">${nx?`${nx[0]-u.stars} stars to ${nx[1]}`:'Max level reached!'}</p><div class="badges">${badgesOf(u).map(b=>`<span>${b}</span>`).join('')||'<span class="mut">No badges yet</span>'}</div>`}
+function quiz(el,qs,u){if(!u){el.innerHTML='<h3 class="gold">🧠 Daily Festive Quiz</h3><p class="mut" style="margin:12px 0">Log in to take today\'s quiz.</p><button class="btn" onclick="authModal()">Log in</button>';return}
+  if(u.quizDate===dayKey()){el.innerHTML='<h3 class="gold">🧠 Daily Festive Quiz</h3><div class="empty"><big>✅</big>You\'ve completed today\'s quiz. Come back tomorrow!</div>';return}
+  let i=0,sc=0;const show=()=>{if(i>=qs.length){u.quizDate=dayKey();if(sc>=3)u.stats.quiz++;save();el.innerHTML=`<h3 class="gold">🧠 Quiz complete!</h3><div class="empty"><big>${sc>=4?'🏆':'🎉'}</big>You scored ${sc}/${qs.length}</div>`;addStars(sc*5,'quiz reward');return}
+    const[q,o,a]=qs[i];el.innerHTML=`<h3 class="gold">🧠 Daily Festive Quiz <span class="mut" style="font-size:.8rem">${i+1}/${qs.length}</span></h3><p style="margin:12px 0"><b>${h(q)}</b></p>${o.map((t,k)=>`<button class="opt" data-k="${k}">${h(t)}</button>`).join('')}`;
+    $$('.opt',el).forEach(b=>b.onclick=()=>{const k=+b.dataset.k;$$('.opt',el).forEach(x=>{x.disabled=true;if(+x.dataset.k===a)x.classList.add('ok')});if(k===a)sc++;else b.classList.add('no');setTimeout(()=>{i++;show()},900)})};show()}
+
+/* ===================== PROFILE ===================== */
+let PT='posts';
+function vProfile(el,id){
+  const m=me(),u=id?user(id):m;if(!u){el.innerHTML=`<div class="wrap empty"><big>🪔</big><h3>Log in to see your profile</h3><br><button class="btn" onclick="authModal()">Log in / Sign up</button></div>`;return}
+  const own=m?.id===u.id,ps=db.posts.filter(p=>p.userId===u.id&&(!p.hidden||own)).sort((a,b)=>b.t-a.t),sv=own?db.posts.filter(p=>u.saved.includes(p.id)&&!p.hidden):[],fol=m&&u.followers.includes(m.id);
+  const tiles=l=>l.length?`<div class="grid g3" style="grid-template-columns:repeat(auto-fill,minmax(200px,1fr))">${l.map(p=>`<div class="card post" style="padding:0"><img src="${p.img}" style="width:100%;aspect-ratio:1;object-fit:cover;cursor:zoom-in" onclick="A.gallery('${p.id}')"><div class="acts"><span>❤️ ${p.likes.length}</span><span>💬 ${p.comments.length}</span>${p.hidden?'<span class="mut">(hidden by mod)</span>':''}</div></div>`).join('')}</div>`:'<div class="empty"><big>📷</big>Nothing here yet</div>';
+  el.innerHTML=`<div class="wrap"><div class="card glow" style="margin-top:24px"><div class="row" style="gap:20px">${av(u,96)}<div style="flex:1;min-width:220px"><h2 class="gold">${h(u.username)}${u.role==='admin'?' 🛡️':''}</h2><p class="mut">${h(u.bio)}</p><div class="row" style="margin-top:12px;gap:22px"><div class="stat"><b>${ps.length}</b>Posts</div><div class="stat"><b>${totalLikes(u)}</b>Likes</div><div class="stat"><b>${u.followers.length}</b>Followers</div><div class="stat"><b>${u.following.length}</b>Following</div><div class="stat"><b>${u.stars}</b>⭐</div></div></div>
+  <div class="row">${own?`<button class="btn ghost sm" id="pe">✏️ Edit profile</button><button class="btn ghost sm" onclick="if(confirm('Reset all local data?')){localStorage.removeItem(KEY);location.reload()}">♻️ Reset</button>`:`<button class="btn sm" id="pf">${fol?'Following ✓':'Follow'}</button>`}</div></div>
+  <p style="margin-top:14px"><b>${LVL[lvlOf(u.stars)][1]}</b></p><div class="badges">${badgesOf(u).map(b=>`<span>${b}</span>`).join('')||'<span class="mut">No badges yet</span>'}</div></div>
+  <div class="tabs"><span class="chip ${PT==='posts'?'on':''}" data-pt="posts">📸 Posts</span>${own?`<span class="chip ${PT==='saved'?'on':''}" data-pt="saved">★ Favourites</span>`:''}</div><div id="pc">${tiles(PT==='saved'&&own?sv:ps)}</div></div>`;
+  $$('[data-pt]').forEach(c=>c.onclick=()=>{PT=c.dataset.pt;vProfile(el,id)});
+  $('#pf')?.addEventListener('click',()=>{const a=needAuth();if(!a)return;const i=u.followers.indexOf(a.id);if(i>-1){u.followers.splice(i,1);a.following=a.following.filter(x=>x!==u.id)}else{u.followers.push(a.id);a.following.push(u.id);notify(u.id,`${a.username} started following you 🙌`)}save();updateAuth();vProfile(el,id)});
+  $('#pe')?.addEventListener('click',()=>{let av2=u.avatar;const mm=modal(`<h3 class="gold">Edit profile</h3><form id="ef"><label>Profile picture</label><input type="file" id="epf" accept="image/*"><label>Display name</label><input name="un" maxlength="20" value="${h(u.username)}"><label>Or emoji avatar</label><input name="em" maxlength="2" value="${u.avatar&&!u.avatar.startsWith('data:')?h(u.avatar):''}" placeholder="🪔"><label>Bio</label><textarea name="b" rows="3" maxlength="160">${h(u.bio)}</textarea><p id="ee" style="color:#ff6b81;font-size:.85rem;min-height:20px"></p><button class="btn" style="width:100%">Save</button></form>`);
+    $('#epf',mm).onchange=async e=>{const f=e.target.files[0],er=validImg(f);$('#ee',mm).textContent=er;if(er)return;av2=await compress(f,200,.8)};
+    $('#ef',mm).onsubmit=e=>{e.preventDefault();const f=new FormData(e.target);const nn=f.get('un').trim();if(!/^[A-Za-z0-9_ ]{3,20}$/.test(nn))return $('#ee',mm).textContent='Name: 3–20 letters or numbers.';if(db.users.some(x=>x.id!==u.id&&x.username.toLowerCase()===nn.toLowerCase()))return $('#ee',mm).textContent='That name is taken.';u.username=nn;u.bio=f.get('b').trim().slice(0,160);const em=f.get('em').trim();u.avatar=av2?.startsWith('data:')?av2:em||av2;if(save()){closeModal();updateAuth();vProfile(el,id)}}})}
+
+/* ===================== ADMIN ===================== */
+function vAdmin(el){
+  const u=me();if(!u){el.innerHTML=`<div class="wrap empty"><big>🔒</big><h3>Admins only</h3><p>Log in with an admin account (demo: admin / admin123).</p></div>`;return}
+  const top=db.posts.slice().sort((a,b)=>b.likes.length-a.likes.length).slice(0,5),rep=db.reports.filter(r=>!r.done);
+  el.innerHTML=`<div class="wrap"><h2 class="sec gold" style="margin-top:24px">🛡️ Admin Dashboard</h2>
+  <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr))">${[['👥',db.users.length,'Users'],['🖼️',db.posts.length,'Pictures'],['🚩',rep.length,'Open reports'],['❤️',db.posts.reduce((s,p)=>s+p.likes.length,0),'Total likes']].map(([i,n,l])=>`<div class="card stat"><span style="font-size:1.6rem">${i}</span><b>${n}</b>${l}</div>`).join('')}</div>
+  <div class="grid g2" style="margin-top:18px"><div class="card"><h3 class="gold">Most liked posts</h3><table>${top.map(p=>`<tr><td><img src="${p.img}" style="width:40px;height:40px;border-radius:8px;object-fit:cover"></td><td>${h(user(p.userId)?.username)}</td><td>❤️ ${p.likes.length}</td></tr>`).join('')}</table></div>
+  <div class="card"><h3 class="gold">Trending hashtags</h3><div class="row" style="margin-top:10px">${trending().map(([t,n])=>`<span class="chip">${h(t)} · ${n}</span>`).join('')}</div></div></div>
+  <div class="card" style="margin-top:18px"><h3 class="gold">🚩 Reported content</h3>${rep.length?`<table>${rep.map(r=>{const p=post(r.postId);return`<tr><td>${p?`<img src="${p.img}" style="width:48px;height:48px;border-radius:8px;object-fit:cover">`:'(deleted)'}</td><td>${h(r.reason)}<br><span class="mut">by ${h(user(r.by)?.username)} · ${ago(r.t)}</span></td><td class="row"><button class="btn ghost sm" onclick="Ad.dismiss('${r.id}')">Dismiss</button>${p?`<button class="btn danger sm" onclick="Ad.remove('${p.id}')">Remove post</button>`:''}</td></tr>`}).join('')}</table>`:'<div class="empty">🎉 No open reports</div>'}</div>
+  <div class="grid g2" style="margin-top:18px"><div class="card"><h3 class="gold">👥 User management</h3><table>${db.users.map(x=>`<tr><td>${av(x,28)}</td><td>${h(x.username)}<br><span class="mut" style="font-size:.75rem">${x.role}${x.banned?' · banned':''}</span></td><td>${x.id===u.id?'':`<button class="btn ghost sm" onclick="Ad.ban('${x.id}')">${x.banned?'Unban':'Ban'}</button> <button class="btn danger sm" onclick="Ad.delUser('${x.id}')">✕</button>`}</td></tr>`).join('')}</table></div>
+  <div class="card"><h3 class="gold">🖼️ Post moderation</h3><table>${db.posts.slice().sort((a,b)=>b.t-a.t).slice(0,12).map(p=>`<tr><td><img src="${p.img}" style="width:40px;height:40px;border-radius:8px;object-fit:cover"></td><td>${h(user(p.userId)?.username)}<br><span class="mut" style="font-size:.75rem">${p.hidden?'hidden':'visible'}</span></td><td><button class="btn ghost sm" onclick="Ad.hide('${p.id}')">${p.hidden?'Show':'Hide'}</button> <button class="btn danger sm" onclick="Ad.remove('${p.id}')">✕</button></td></tr>`).join('')}</table></div></div></div>`}
+const Ad={dismiss(id){db.reports.find(r=>r.id===id).done=true;save();route()},remove(id){if(!confirm('Remove this post?'))return;const p=post(id);if(p)notify(p.userId,'A post of yours was removed by moderators.');db.posts=db.posts.filter(p=>p.id!==id);db.reports.forEach(r=>{if(r.postId===id)r.done=true});save();route()},hide(id){const p=post(id);p.hidden=!p.hidden;save();route()},ban(id){const x=user(id);x.banned=!x.banned;save();route()},delUser(id){if(!confirm('Delete user and all their posts?'))return;db.posts=db.posts.filter(p=>p.userId!==id);db.users=db.users.filter(x=>x.id!==id);save();route()}};
+
+/* ===================== INIT ===================== */
+$('#bMusic').onclick=()=>Snd.toggleMusic();
+$('#bTheme').onclick=()=>{const t=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=t;localStorage.setItem('dvTheme',t);$('#bTheme').textContent=t==='dark'?'🌙':'☀️'};
+$('#bBell').onclick=e=>{e.stopPropagation();const u=me();if(!u)return authModal();const old=$('.pop');if(old)return old.remove();const l=db.notifs.filter(n=>n.to===u.id).sort((a,b)=>b.t-a.t).slice(0,15),d=document.createElement('div');d.className='pop';d.innerHTML=l.length?l.map(n=>`<div style="${n.read?'opacity:.6':''}">${h(n.text)}<br><span class="mut" style="font-size:.7rem">${ago(n.t)}</span></div>`).join(''):'<div class="mut">No notifications yet 🔔</div>';$('#bBell').parentElement.append(d);db.notifs.forEach(n=>{if(n.to===u.id)n.read=true});save();setTimeout(updateAuth,0)};
+document.addEventListener('click',e=>{if(!e.target.closest('.pop'))$('.pop')?.remove()});
+(async()=>{const t=localStorage.getItem('dvTheme');if(t){document.documentElement.dataset.theme=t;$('#bTheme').textContent=t==='dark'?'🌙':'☀️'}
+  try{await load()}catch(e){console.error(e);toast('Could not load saved data – starting fresh');localStorage.removeItem(KEY);await load()}
+  if(db.session&&(!me()||me().banned)){db.session=null}ensureGuest();updateAuth();route();sky()})();
+</script>
+</body>
+</html>
